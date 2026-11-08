@@ -1,6 +1,7 @@
 export const defaultCategories = {expense:['Alimentação','Transporte','Restaurantes','Casa','Saúde','Outros'],income:['Salário','Trabalho independente','Negócio','Dividendos','Juros','Outros']};
 export function migrate(state){
  state.connections ??= []; state.incomes ??= []; state.holdings ??= []; state.wallets ??= [];
+ state.profile ??= {name:''}; state.demo ??= false; state.payday ??= '';
  state.categories ??= {};
  for(const type of ['expense','income']) state.categories[type] ??= [...defaultCategories[type]];
  return state;
