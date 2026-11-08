@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {migrate,portfolio,incomeTotals,addIncome,receiveIncome,removeIncome,addCategory} from '../src/finance.js';
+import {budget} from '../src/budget.js';
+test('existing records survive schema migration',()=>{const s={balance:120,expenses:[{amount:5}]};migrate(s);assert.equal(s.balance,120);assert.equal(s.expenses.length,1);assert.deepEqual(s.holdings,[]);assert.ok(s.categories.income.includes('Dividendos'));});
+test('portfolio tracks gains without entering available budget',()=>{const s=migrate({balance:100,expenses:[],bills:[],goal:{reserved:0},today:'2026-11-08',payday:'2026-11-25'});s.holdings=[{quantity:2,cost:50,price:60},{quantity:0.5,cost:100,price:80}];assert.deepEqual(portfolio(s.holdings),{cost:150,value:160,gain:10,percent:10/150*100});assert.equal(budget(s).available,100);});
+test('expected income is excluded until confirmed exactly once',()=>{const s=migrate({balance:100});addIncome(s,{id:'a',name:'Salário',amount:500,date:'2026-11-25',status:'expected'});assert.equal(s.balance,100);assert.deepEqual(incomeTotals(s.incomes,'2026-11'),{received:0,expected:500});receiveIncome(s,'a');receiveIncome(s,'a');assert.equal(s.balance,600);removeIncome(s,'a');assert.equal(s.balance,100);});
+test('categories distinguish income from expenses and reject duplicates',()=>{const s=migrate({});addCategory(s,'income',' Rendas ');assert.ok(s.categories.income.includes('Rendas'));assert.ok(!s.categories.expense.includes('Rendas'));assert.throws(()=>addCategory(s,'income','rendas'));assert.throws(()=>addCategory(s,'expense','  '));});

@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {connectionProfile,createConnectorRegistry} from '../src/connectors.js';
+const input={group:'exchange',protocol:'api',provider:'binance',name:'A minha conta',endpoint:'https://api.example.com'};
+test('universal profiles store metadata without secret values or activation',()=>{const p=connectionProfile({...input,apiKey:'do-not-store'});assert.equal(p.status,'adapter-required');assert.equal(p.permissions,'read-only');assert.equal(p.apiKey,undefined);});
+test('reject unsafe endpoints and category mismatches',()=>{for(const endpoint of ['http://api.example.com','https://user:pass@api.example.com','https://api.example.com/?key=secret','https://127.0.0.1','https://localhost','https://[::1]'])assert.throws(()=>connectionProfile({...input,endpoint}));assert.throws(()=>connectionProfile({...input,group:'wallet'}));});
+test('unknown providers cannot execute remote tools or requests',async()=>{const registry=createConnectorRegistry();await assert.rejects(()=>registry.sync(connectionProfile(input),{subject:'user-1'}),/adaptador/);});
+test('registered adapters require authenticated subject and read-only scope',async()=>{const registry=createConnectorRegistry();let count=0;registry.register('api:binance',{readPortfolio:async({subject})=>{count++;return {subject,positions:[]};}});const p=connectionProfile(input);await assert.rejects(()=>registry.sync(p,{}),/Autenticação/);await assert.rejects(()=>registry.sync({...p,permissions:'trade'},{subject:'user-1'}),/leitura/);assert.equal(count,0);assert.deepEqual(await registry.sync(p,{subject:'user-1'}),{subject:'user-1',positions:[]});});
