@@ -1,6 +1,6 @@
 # Finances Control
 
-Protótipo web responsivo de um assistente de finanças pessoais, em português e CHF. Os dados de exemplo usam 8 de novembro de 2026 como data de referência.
+Assistente de finanças pessoais em português, instalável como app (PWA). Funciona offline e guarda os dados apenas no dispositivo. Política de privacidade publicada em `/privacidade.html`.
 
 ## Executar
 
@@ -16,22 +16,27 @@ npm test
 npm run build
 ```
 
+`npm run dev` e `npm run build` correm antes `scripts/copy-ocr.mjs`, que copia o motor de OCR e os idiomas (alemão e português) de `node_modules` para `public/ocr/`. Essa pasta é gerada e não vai para o Git.
+
 Em ambientes que não permitem escrever no cache padrão, usa `npm ci --cache /tmp/fc-npm-cache`.
 
-## Percursos disponíveis
+## O que o app faz
 
-- Consultar saldo conhecido, despesas, compromissos, reserva da meta e margem diária até ao pagamento. Salários previstos ficam excluídos do disponível.
-- Registar e eliminar despesas; interpretar uma frase escrita e rever os campos antes de confirmar.
-- Simular um talão e associá-lo a uma despesa sem duplicar o valor.
-- Simular um contrato, confirmar taxa líquida e horas, e confirmar a receção do pagamento separadamente.
-- Editar a meta e a reserva; marcar contas como pagas com atualização do saldo.
-- Consultar explicações determinísticas do orçamento; exportar ou eliminar dados locais.
+- **Primeiro arranque:** pergunta o nome, a moeda, o saldo atual e a data do próximo pagamento. A demonstração com dados fictícios só abre se o utilizador a escolher.
+- **Datas reais:** tudo usa o relógio do dispositivo (`src/dates.js`). Se a data do pagamento já passou, o app avisa e sugere a data equivalente do mês seguinte, que o utilizador confirma.
+- **Moedas** (`src/money.js`): moeda base escolhida pelo utilizador (CHF, EUR, CVE, USD, GBP, BRL, AOA) e uma moeda "estou a gastar em" para viagens. As despesas noutra moeda são convertidas pela taxa que o utilizador indica e guardam o valor original. O app não vai buscar câmbios à internet; a única taxa incluída é a paridade legal EUR/CVE (110,265). Mudar a moeda base converte todos os valores à taxa indicada e fica registado.
+- **Voz** (`src/voice.js`, `src/speech.js`): ditado pela Web Speech API do navegador (pt-PT). A frase é interpretada em valor, moeda, loja e categoria. Frase completa com taxa conhecida é guardada logo, com botão Anular; caso contrário abre o formulário preenchido. No Chrome, o áudio é transcrito pelo serviço da Google.
+- **Talões** (`src/ocr.js`, `src/receipt.js`): a câmara traseira fotografa o talão e o Tesseract lê-o no próprio telemóvel, sem enviar a foto. O app extrai loja, total, data e moeda (formatos suíço, português e cabo-verdiano, incluindo `1.230$00`) e pré-preenche a despesa para confirmação. Idioma do OCR: alemão quando se gasta em CHF, português nos restantes casos. O motor e o idioma (cerca de 6 MB) são descarregados só no primeiro uso.
+- **Contratos e rendimentos:** formulário com agência, taxa líquida por hora, horas e data de pagamento. O rendimento previsto fica fora do disponível até ser confirmado.
+- **Metas, contas a pagar, investimentos manuais, cofre cifrado opcional, exportação e eliminação de dados.**
 
-## Limites do protótipo
+## Limites conhecidos
 
-Não há backend, autenticação, IA generativa, OCR, reconhecimento de voz, ligação bancária, comparação de preços ou geolocalização. A consulta opcional de carteira EVM é limitada e descrita abaixo. Fotos/documentos selecionados não são lidos, enviados ou armazenados. Os dados são guardados em `localStorage` neste navegador; a cifragem é opcional e só fica ativa após configurar o cofre em Definições. Não usar com dados sensíveis reais.
-
-Os cálculos têm testes automatizados. Os percursos de despesa, associação de talão, contrato, persistência, consulta de orçamento e layout móvel foram também verificados em Chromium.
+- Não há backend nem sincronização: os dados vivem no `localStorage` do navegador. Limpar o navegador apaga-os; o cofre não tem recuperação de palavra-passe. Exportar com regularidade.
+- A leitura de talões funciona bem com talões nítidos e esticados; talões térmicos gastos ou amarrotados falham mais. O total lido deve sempre ser confirmado.
+- A interpretação da voz é por palavras-chave, não por IA. Frases fora do padrão abrem o formulário.
+- Os rendimentos só aceitam a moeda base.
+- Os cabeçalhos de segurança definidos em `netlify.toml` (CSP, Permissions-Policy, etc.) não estavam a ser enviados pela Netlify em 9 nov. 2026. Ver em Netlify → Deploys → "Header rules".
 
 ## Instalar no Android
 
