@@ -2,6 +2,9 @@
 // Exemplos: "estou no shopping, fiz uma compra na loja Zara e o valor deu 45 francos"
 //           "gastei 12,50 euros no restaurante" · "300 escudos na padaria"
 
+// Compara sem acentos e sem maiusculas: "almoco" encontra "almoço", "farmacia" encontra "farmácia".
+export const fold = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-PT');
+
 const CURRENCY_WORDS = [
  [/\b(francos?|chf|fr\.?)\b/i, 'CHF'],
  [/\b(euros?|eur)\b|€/i, 'EUR'],
@@ -63,16 +66,22 @@ export function detectAmount(text) {
 }
 
 export function matchCategory(text, available = []) {
- const t = ` ${text.toLocaleLowerCase('pt-PT')} `;
+ const t = ` ${fold(text)} `;
  const fallback = available.includes('Outros') || !available.length ? 'Outros' : available[0];
+ // O nome da propria categoria, dito ou escrito ("20 francos em alimentacao").
+ for (const name of available) {
+  const f = fold(name);
+  if (f !== 'outros' && new RegExp(`\\b${f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(t)) return {category: name, word: null};
+ }
  for (const [category, words] of CATEGORY_WORDS) {
-  const word = words.find(w => t.includes(w));
+  const word = words.find(w => t.includes(fold(w)));
   if (word) return {category: available.length && !available.includes(category) ? fallback : category, word: word.trim()};
  }
  return {category: fallback, word: null};
 }
 export const detectCategory = (text, available = []) => matchCategory(text, available).category;
 const GENERIC_WORDS = new Set(['loja','shopping','centro comercial','supermercado','comida','compras da casa','bilhete','passe','roupa','sapatos']);
+const isGeneric = word => GENERIC_WORDS.has(fold(word));
 
 export function parseSpoken(text, {categories = []} = {}) {
  const heard = String(text || '').trim();
@@ -87,7 +96,8 @@ export function parseSpoken(text, {categories = []} = {}) {
   merchant = candidates.at(-1) || '';
  }
  const {category, word} = matchCategory(`${merchant} ${phrase}`, categories);
- if (!merchant && word && !GENERIC_WORDS.has(word)) {
+ if (merchant && categories.some(c => fold(c) === fold(merchant))) merchant = '';
+ if (!merchant && word && !isGeneric(word)) {
   // Usa a palavra como foi dita/escrita ("Ikea", "SBB"); so capitaliza se vier toda em minusculas.
   const asSaid = phrase.match(new RegExp(word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'))?.[0] || word;
   merchant = asSaid === asSaid.toLocaleLowerCase('pt-PT') ? asSaid[0].toLocaleUpperCase('pt-PT') + asSaid.slice(1) : asSaid;
