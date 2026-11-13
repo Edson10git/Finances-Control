@@ -60,6 +60,8 @@ export function convertState(state, newBase, rate) {
  for (const key of ['target', 'saved', 'reserved']) state.goal[key] = conv(state.goal[key]);
  for (const list of ['expenses', 'bills', 'incomes']) for (const item of state[list] || []) item.amount = conv(item.amount);
  for (const h of state.holdings || []) { h.cost = conv(h.cost); h.price = conv(h.price); }
+ for (const a of state.assets || []) a.value = conv(a.value);
+ for (const d of state.debts || []) { d.remaining = conv(d.remaining); d.monthly = conv(d.monthly); }
  if (state.contract) state.contract.rate = conv(state.contract.rate);
  rememberRate(state, oldBase, newBase, rate);
  state.currencyLog ??= [];

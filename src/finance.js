@@ -15,6 +15,7 @@ export function normalizeCategories(state){
 }
 export function migrate(state){
  state.connections ??= []; state.incomes ??= []; state.holdings ??= []; state.wallets ??= [];
+ state.assets ??= []; state.debts ??= [];
  state.profile ??= {name:''}; state.demo ??= false; state.payday ??= '';
  state.currency ??= 'CHF'; state.spendCurrency ??= state.currency; state.rates ??= {};
  state.categories ??= {};
