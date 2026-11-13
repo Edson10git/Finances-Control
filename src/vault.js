@@ -28,3 +28,18 @@ export async function enableVault(password,state){
  try{salt=crypto.getRandomValues(new Uint8Array(16));key=await derive(password,salt);const raw=await encrypted(state);localStorage.setItem(VAULT,raw);localStorage.removeItem(LEGACY);}catch(error){key=previousKey;salt=previousSalt;throw error;}
 }
 export async function lockVault(){await queue;location.reload();}
+
+// Ficheiros anexados: ficam no IndexedDB, nao no localStorage, e sao cifrados
+// com a mesma chave do cofre quando o cofre esta ativo.
+export const vaultActive = () => !!key;
+export async function sealBytes(bytes) {
+ if (!key) return {sealed: false, data: bytes};
+ const iv = crypto.getRandomValues(new Uint8Array(12));
+ const data = await crypto.subtle.encrypt({name: 'AES-GCM', iv}, key, bytes);
+ return {sealed: true, iv, data: new Uint8Array(data)};
+}
+export async function openBytes(record) {
+ if (!record.sealed) return record.data;
+ if (!key) throw new Error('Desbloqueia o cofre para abrir este documento.');
+ return new Uint8Array(await crypto.subtle.decrypt({name: 'AES-GCM', iv: record.iv}, key, record.data));
+}
