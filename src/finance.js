@@ -1,10 +1,25 @@
 export const defaultCategories = {expense:['Alimentação','Transporte','Restaurantes','Casa','Saúde','Compras','Outros'],income:['Salário','Trabalho independente','Negócio','Dividendos','Juros','Outros']};
+const fold=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-PT');
+// Registos criados por versoes antigas ficaram com "Alimentacao" em vez de "Alimentação".
+// Sem isto o utilizador acaba com duas categorias iguais com nomes diferentes.
+export function normalizeCategories(state){
+ const canon=new Map([...defaultCategories.expense,...defaultCategories.income].map(name=>[fold(name),name]));
+ const fix=name=>canon.get(fold(name))??name;
+ for(const list of ['expenses','incomes'])for(const item of state[list]||[])if(item?.category)item.category=fix(item.category);
+ for(const type of ['expense','income']){
+  const seen=new Set();
+  state.categories[type]=(state.categories[type]||[]).map(fix).filter(name=>{const key=fold(name);if(seen.has(key))return false;seen.add(key);return true;});
+  for(const name of defaultCategories[type])if(!state.categories[type].some(c=>fold(c)===fold(name)))state.categories[type].push(name);
+ }
+ return state;
+}
 export function migrate(state){
  state.connections ??= []; state.incomes ??= []; state.holdings ??= []; state.wallets ??= [];
  state.profile ??= {name:''}; state.demo ??= false; state.payday ??= '';
  state.currency ??= 'CHF'; state.spendCurrency ??= state.currency; state.rates ??= {};
  state.categories ??= {};
  for(const type of ['expense','income']) state.categories[type] ??= [...defaultCategories[type]];
+ normalizeCategories(state);
  return state;
 }
 export function portfolio(holdings){

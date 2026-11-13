@@ -13,16 +13,22 @@ export function listen({lang = 'pt-PT', onText, onFinal, onError, onEnd} = {}) {
  rec.continuous = false;
  rec.maxAlternatives = 1;
  let finalText = '';
+ // Confianca mais baixa entre os troços finais: serve para avisar quando a leitura nao foi clara.
+ let confidence = null;
  rec.onresult = event => {
   let interim = '';
   for (let i = event.resultIndex; i < event.results.length; i++) {
-   const piece = event.results[i][0].transcript;
-   if (event.results[i].isFinal) finalText += piece; else interim += piece;
+   const alternative = event.results[i][0];
+   if (event.results[i].isFinal) {
+    finalText += alternative.transcript;
+    const score = Number(alternative.confidence);
+    if (Number.isFinite(score) && score > 0) confidence = confidence === null ? score : Math.min(confidence, score);
+   } else interim += alternative.transcript;
   }
   onText?.((finalText + interim).trim());
  };
  rec.onerror = event => onError?.(event.error || 'error');
- rec.onend = () => { if (finalText.trim()) onFinal?.(finalText.trim()); onEnd?.(); };
+ rec.onend = () => { if (finalText.trim()) onFinal?.(finalText.trim(), {confidence}); onEnd?.(); };
  try { rec.start(); } catch { onError?.('busy'); }
  return () => { try { rec.stop(); } catch {} };
 }

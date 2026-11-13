@@ -60,3 +60,28 @@ test('sem loja, a palavra-chave serve de descricao', () => {
  const ikea = parseSpoken('Ikea 89.90', {categories:cats});
  assert.deepEqual([ikea.merchant, ikea.complete], ['Ikea', true]);
 });
+
+test('palavras sem acento encontram a categoria certa', () => {
+ const almoco = parseSpoken('almoco 18 francos', {categories:cats});
+ assert.deepEqual([almoco.amount, almoco.category], [18, 'Restaurantes']);
+ const pao = parseSpoken('comprei pao 4 francos', {categories:cats});
+ assert.deepEqual([pao.amount, pao.category], [4, 'Alimentação']);
+ const farmacia = parseSpoken('farmacia 30 francos', {categories:cats});
+ assert.deepEqual([farmacia.amount, farmacia.category, farmacia.merchant], [30, 'Saúde', 'Farmácia']);
+ assert.equal(detectCategory('consulta no dentista', cats), 'Saúde');
+});
+
+test('o nome da categoria dito em voz alta conta, e nunca vira o nome da loja', () => {
+ const r = parseSpoken('20 francos em alimentacao', {categories:cats});
+ assert.equal(r.category, 'Alimentação');
+ assert.equal(r.merchant, 'Compra');
+ // sem loja, nao fica completo: tem de passar pelo formulario
+ assert.equal(r.complete, false);
+});
+
+test('maiusculas e minusculas nao mudam a categoria; siglas mantem-se como foram ditas', () => {
+ for (const [phrase, merchant] of [['gastei 20 francos no lidl','Lidl'], ['gastei 20 francos no LIDL','LIDL'], ['gastei 20 francos no Lidl','Lidl']]) {
+  const r = parseSpoken(phrase, {categories:cats});
+  assert.deepEqual([r.amount, r.merchant, r.category, r.complete], [20, merchant, 'Alimentação', true]);
+ }
+});
