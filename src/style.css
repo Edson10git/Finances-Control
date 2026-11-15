@@ -33,3 +33,5 @@ nav button .short{display:none}
  .vault-screen{padding:16px;place-items:start center}
  .vault-screen .card{padding:22px 18px}
 }
+.accounts-card{margin-bottom:20px}.per-currency{display:block;font-size:15px;margin-top:4px}.account-row .merchant-icon{font-weight:700}
+@media(max-width:600px){.account-row,.holding-row{flex-wrap:wrap;align-items:flex-start;row-gap:8px}.account-row>div:nth-child(2),.holding-row>div:nth-child(2){flex:1 1 0;min-width:0}.account-row .movement-value,.holding-row .movement-value{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 16px;text-align:left;padding-left:48px;margin-left:0}.account-row .movement-value b,.holding-row .movement-value b{font-size:17px}.account-row .movement-value small{flex-basis:auto}}
