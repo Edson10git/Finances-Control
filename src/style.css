@@ -3,3 +3,33 @@
 .vault-screen{min-height:100vh;display:grid;place-items:center;padding:24px}.vault-screen .card{width:450px;max-width:100%;padding:30px}.vault-screen h1{font-size:23px;margin-top:20px}.vault-screen p{line-height:1.8}#unlock-error,#vault-status{color:#a35946}.provider-list p{line-height:1.9;font-size:12px}
 .mic{display:flex;align-items:center;justify-content:center;width:88px;height:88px;margin:8px auto 6px;border-radius:50%;background:#153d35;color:#fff;font-size:34px;box-shadow:0 8px 24px rgba(21,61,53,.25)}.mic.listening{background:#c4553d;animation:fc-pulse 1.2s ease-in-out infinite}@keyframes fc-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}.mic-hint{text-align:center;color:#5b6b64;margin:0 0 12px}.movement-value small{display:block;color:#7a8a83;font-size:12px}.rate-field[hidden]{display:none}
 .photo-pick{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;margin:4px 0 6px;border:2px dashed #9fb5ac;border-radius:16px;background:#f3f7f5;color:#153d35;font-weight:600;cursor:pointer}.photo-pick span{font-size:26px}.photo-pick.busy{opacity:.6;pointer-events:none}footer a{color:inherit}
+/* --- telemovel: menu, janelas e areas de toque (nov. 2026) --- */
+nav button span svg{width:20px;height:20px;display:block}
+nav button em{font-style:normal}
+nav button .short{display:none}
+.close{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;font-size:28px;line-height:1;flex:none;margin:-6px -8px 0 0}
+.close:hover,.close:focus-visible{background:#f1f4ef}
+.text-button{font-size:12px;padding:8px 4px;min-height:36px;text-decoration:underline;text-underline-offset:3px}
+.dialog{max-height:90vh;max-height:calc(100dvh - 40px);overscroll-behavior:contain}
+.dialog .section-heading{position:sticky;top:0;background:#fff;z-index:2}
+@keyframes fc-sheet{from{transform:translateY(28px);opacity:.6}to{transform:none;opacity:1}}
+@media(max-width:600px){
+ .overlay{padding:0;place-items:end stretch;align-items:end}
+ .dialog{width:100%;max-width:none;border-radius:22px 22px 0 0;max-height:92vh;max-height:calc(100dvh - 12px);padding:0 18px calc(22px + env(safe-area-inset-bottom));animation:fc-sheet .18s ease-out}
+ .dialog .section-heading{padding:14px 0 8px;margin:0 0 6px;border-bottom:1px solid #eef1ec}
+ .dialog form>button.primary,.dialog form>.primary.full{position:sticky;bottom:0;box-shadow:0 -10px 16px #fff}
+ .dialog input,.dialog select,.dialog textarea{font-size:16px}
+}
+@media(max-width:480px){
+ .sidebar{height:calc(68px + env(safe-area-inset-bottom));padding:0 4px env(safe-area-inset-bottom);background:#fff;box-shadow:0 -6px 22px rgba(16,43,37,.09)}
+ nav{height:68px;gap:2px;align-items:center}
+ nav button{flex:1 1 0;min-width:0;height:58px;font-size:10.5px;padding:6px 2px;margin:0;gap:4px;border-radius:14px;color:#66746b;justify-content:center;align-items:center;line-height:1.1}
+ nav button span{font-size:0;width:auto;display:flex;justify-content:center}
+ nav button span svg{width:23px;height:23px}
+ nav button .full{display:none}
+ nav button .short{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ nav button.active{background:#e7efe9;color:#153d35;font-weight:700}
+ main{margin-bottom:calc(68px + env(safe-area-inset-bottom))}
+ .vault-screen{padding:16px;place-items:start center}
+ .vault-screen .card{padding:22px 18px}
+}
