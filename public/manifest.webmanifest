@@ -2,15 +2,24 @@
   "id": "./",
   "name": "Finances Control",
   "short_name": "Finances",
-  "description": "O teu orçamento pessoal em português e CHF.",
+  "description": "Regista despesas a falar ou com a foto do talão, em francos, euros ou escudos, e vê quanto podes gastar até receber.",
   "lang": "pt-PT",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f7f8f5",
   "theme_color": "#153d35",
+  "categories": ["finance", "productivity"],
   "icons": [
     {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
     {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ],
+  "screenshots": [
+    {"src":"screenshots/1-inicio.png","sizes":"1080x1920","type":"image/png","form_factor":"narrow","label":"Quanto podes gastar até receber"},
+    {"src":"screenshots/2-voz.png","sizes":"1080x1920","type":"image/png","form_factor":"narrow","label":"Regista uma despesa a falar"},
+    {"src":"screenshots/3-talao.png","sizes":"1080x1920","type":"image/png","form_factor":"narrow","label":"Fotografa o talão"},
+    {"src":"screenshots/4-contas.png","sizes":"1080x1920","type":"image/png","form_factor":"narrow","label":"Todas as tuas contas num só lugar"}
   ]
 }
